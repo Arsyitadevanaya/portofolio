@@ -54,4 +54,7 @@ export default defineNuxtConfig({
     color: 'blue',
     height: '5px',
   },
+  nitro: {
+    preset: 'vercel',
+  },
 })

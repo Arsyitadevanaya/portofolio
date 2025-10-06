@@ -1,0 +1,162 @@
+<script setup>
+import { useI18n } from 'vue-i18n'
+
+useHead({
+  title: 'About',
+})
+
+onMounted(() => {
+  useLocaleStore()
+})
+
+const { locale } = useI18n({ useScope: 'global' })
+
+/* Testimonials */
+const { data: testimonials } = await useFetch('/api/testimonials')
+
+const testimonialItem = ref({})
+const activeModal = ref(false)
+const activeOverlay = ref(false)
+
+function showTestimonial(id) {
+  testimonialItem.value = testimonials.value.find(item => item.id === id)
+  activeModal.value = true
+  activeOverlay.value = true
+}
+
+function closeTestimonial() {
+  testimonialItem.value = {}
+  activeModal.value = false
+  activeOverlay.value = false
+}
+
+/* Services */
+const { data: services } = await useFetch('/api/services')
+</script>
+
+<template>
+  <article class="about active" data-page="about">
+    <header>
+      <h2 class="h2 article-title">
+        {{ $t('pageTitles.about') }}
+      </h2>
+    </header>
+
+    <!-- About -->
+    <section class="about-text">
+      <p>
+        I am a recent graduate with an Associate Degree (D3) in Informatics
+        Engineering from the Electronic Engineering Polytechnic Institute of
+        Surabaya (EEPIS). I have a strong passion for technology, particularly
+        in <strong>frontend web development</strong>.
+      </p>
+
+      <p>
+        I enjoy transforming design concepts into responsive, interactive, and
+        user-friendly web applications. My primary focus is on building clean
+        and efficient interfaces using modern technologies such as
+        <strong>Vue.js</strong>, <strong>Nuxt.js</strong>, and
+        <strong>TypeScript</strong>.
+      </p>
+
+      <p>
+        I am continuously learning and exploring best practices in UI/UX,
+        performance optimization, and web accessibility to deliver meaningful
+        digital experiences.
+      </p>
+    </section>
+
+    <!-- Services -->
+    <section class="service">
+      <h3 class="h3 service-title">What I'm Doing</h3>
+
+      <ul class="service-list">
+        <ServiceItem
+          v-for="service in services"
+          :key="service.id"
+          :service="service"
+        />
+      </ul>
+    </section>
+
+    <!-- Testimonials -->
+    <section class="testimonials">
+      <h3 class="h3 testimonials-title">Testimonials</h3>
+
+      <ul class="testimonials-list has-scrollbar">
+        <li
+          v-for="testimonial in testimonials"
+          :key="testimonial.id"
+          class="testimonials-item"
+          @click="showTestimonial(testimonial.id)"
+        >
+          <div class="content-card">
+            <figure class="testimonials-avatar-box">
+              <img :src="testimonial.image" :alt="testimonial.title" width="60" />
+            </figure>
+
+            <h4 class="h4 testimonials-item-title">
+              {{ testimonial.title }}
+            </h4>
+
+            <div class="testimonials-text">
+              <p>
+                {{ locale === 'en' ? testimonial.content?.en : testimonial.content?.tr }}
+              </p>
+            </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <!-- Testimonials Modal -->
+    <div class="modal-container" :class="{ active: activeModal }">
+      <div
+        v-show="activeModal"
+        class="overlay"
+        :class="{ active: activeOverlay }"
+      />
+
+      <section class="testimonials-modal">
+        <button class="modal-close-btn" @click="closeTestimonial">
+          <ion-icon name="close-outline" />
+        </button>
+
+        <div class="flex gap-5 mb-5 justify-start items-center">
+          <div class="modal-avatar-box">
+            <img
+              :src="testimonialItem.image"
+              :alt="testimonialItem.title"
+              width="80"
+            />
+          </div>
+
+          <div class="modal-content">
+            <h4 class="h3 modal-title">{{ testimonialItem.title }}</h4>
+            <time datetime="2025-05-25">25 April, 2025</time>
+          </div>
+        </div>
+
+        <div class="flex gap-5 items-start">
+          <img
+            class="my-auto hidden md:block"
+            src="/images/icon-quote.svg"
+            alt="quote icon"
+          />
+          <p
+            class="text-justify text-gray-400 text-sm md:text-md"
+            v-html="
+              locale === 'en'
+                ? testimonialItem.content?.en
+                : testimonialItem.content?.tr
+            "
+          />
+        </div>
+        <div class="mt-2 flex justify-end text-sm text-gray-600 italic">
+          Company Co.
+        </div>
+      </section>
+    </div>
+
+  </article>
+</template>
